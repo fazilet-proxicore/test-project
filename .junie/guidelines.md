@@ -7,7 +7,7 @@ Here local guidelines
 My Laravel docs
 
 ....
-TEST CONTENT TO MERGE
+
 
 Hello world
 

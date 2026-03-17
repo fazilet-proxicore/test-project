@@ -25,20 +25,21 @@ class MergeJunieGuidelines extends Command
     {
         $localGuidelinesPath = base_path($this->option('local'));
         $outputGuidelinesPath = base_path($this->option('output'));
-
         try {
             $mergedContent = $this->guidelineMerger->mergeFromLocalFile($localGuidelinesPath);
-
-            File::ensureDirectoryExists(dirname($outputGuidelinesPath));
-            File::put($outputGuidelinesPath, trim($mergedContent).PHP_EOL);
-
-            $this->info("Junie guidelines generated: {$outputGuidelinesPath}");
-
-            return self::SUCCESS;
         } catch (RuntimeException $exception) {
             $this->error($exception->getMessage());
 
             return self::FAILURE;
         }
+        foreach ($this->guidelineMerger->warnings() as $warning) {
+            $this->warn($warning);
+        }
+        File::ensureDirectoryExists(dirname($outputGuidelinesPath));
+        File::put($outputGuidelinesPath, trim($mergedContent).PHP_EOL);
+
+        $this->info("Junie guidelines generated: {$outputGuidelinesPath}");
+
+        return self::SUCCESS;
     }
 }
