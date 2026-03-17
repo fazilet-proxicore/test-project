@@ -1,16 +1,3 @@
-#Pulse Junie Guidelines
-
-Pulse is a repository to handle Customers as a CMS....
-
-Here local guidelines
-
-My Laravel docs
-
-....
-TEST CONTENT TO MERGE
-
-Hello world
-
 # API Scaffolding Guidelines
 
 This guide describes the exact steps and copy-ready templates to introduce a brand‑new domain table with a full REST API (Laravel 12, PHP 8.2+).
@@ -475,3 +462,5 @@ When adding FKs in migrations on MySQL, always:
     1) `$table->dropForeign('<fk_name>');`
     2) `$table->dropIndex('<index_name>');`
     3) `$table->dropColumn('<column>');`
+
+    
