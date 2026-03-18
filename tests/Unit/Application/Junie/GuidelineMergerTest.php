@@ -2,12 +2,12 @@
 
 namespace Tests\Unit\Application\Junie;
 
-use App\Application\Junie\GuidelineMerger;
-use App\Application\Junie\IncludeExpander;
-use App\Application\Junie\PathResolver;
 use Illuminate\Support\Facades\File;
 use Mockery\MockInterface;
 use RuntimeException;
+use Support\JunieGuidelines\GuidelineMerger;
+use Support\JunieGuidelines\IncludeExpander;
+use Support\JunieGuidelines\PathResolver;
 use Tests\TestCase;
 
 class GuidelineMergerTest extends TestCase

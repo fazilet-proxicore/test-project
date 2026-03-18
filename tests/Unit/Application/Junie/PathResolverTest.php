@@ -2,8 +2,8 @@
 
 namespace Tests\Unit\Application\Junie;
 
-use App\Application\Junie\PathResolver;
 use Illuminate\Support\Facades\File;
+use Support\JunieGuidelines\PathResolver;
 use Tests\TestCase;
 
 class PathResolverTest extends TestCase
@@ -26,14 +26,6 @@ class PathResolverTest extends TestCase
         $this->assertFalse($this->resolver->isAbsolutePath('../foo/bar'));
     }
 
-    public function test_is_wildcard_path(): void
-    {
-        $this->assertTrue($this->resolver->isWildcardPath('foo/*.md'));
-        $this->assertTrue($this->resolver->isWildcardPath('*.md'));
-        $this->assertTrue($this->resolver->isWildcardPath('foo/**/bar.md'));
-        $this->assertFalse($this->resolver->isWildcardPath('foo/bar.md'));
-    }
-
     public function test_normalize_path(): void
     {
         // realpath only works for existing paths, we'll test it doesn't crash
@@ -42,12 +34,6 @@ class PathResolverTest extends TestCase
 
         $nonExistent = '/non/existent/path/123';
         $this->assertEquals($nonExistent, $this->resolver->normalizePath($nonExistent));
-    }
-
-    public function test_resolve_glob_path(): void
-    {
-        $this->assertEquals('/absolute/path/*.md', $this->resolver->resolveGlobPath('/absolute/path/*.md', '/relative/to'));
-        $this->assertEquals('/relative/to' . DIRECTORY_SEPARATOR . 'foo/*.md', $this->resolver->resolveGlobPath('foo/*.md', '/relative/to'));
     }
 
     public function test_resolve_path_absolute(): void
@@ -79,6 +65,33 @@ class PathResolverTest extends TestCase
         $expected = base_path('foo.md');
 
         $result = $this->resolver->resolvePath('foo.md', '/relative/to');
+        $this->assertEquals($expected, $result);
+    }
+
+    public function test_resolve_folder_path_absolute(): void
+    {
+        $this->assertEquals('/absolute/folder', $this->resolver->resolveFolderPath('/absolute/folder/', '/relative/to'));
+    }
+
+    public function test_resolve_folder_path_relative_exists(): void
+    {
+        File::shouldReceive('isDirectory')
+            ->with('/relative/to' . DIRECTORY_SEPARATOR . 'guides')
+            ->andReturn(true);
+
+        $result = $this->resolver->resolveFolderPath('guides', '/relative/to');
+        $this->assertEquals('/relative/to' . DIRECTORY_SEPARATOR . 'guides', $result);
+    }
+
+    public function test_resolve_folder_path_relative_missing_fallback_to_base_path(): void
+    {
+        File::shouldReceive('isDirectory')
+            ->with('/relative/to' . DIRECTORY_SEPARATOR . 'guides')
+            ->andReturn(false);
+
+        $expected = base_path('guides');
+
+        $result = $this->resolver->resolveFolderPath('guides', '/relative/to');
         $this->assertEquals($expected, $result);
     }
 }
