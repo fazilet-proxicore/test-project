@@ -8,6 +8,7 @@ class IncludeExpander
 {
     private const FILE_INCLUDE_PATTERN = '/\{\$includeFile=(.+?)\$}/';
 
+    //if we use wildcard we do not need this
     private const FOLDER_INCLUDE_PATTERN = '/\{\$includeFolder=(.+?)\$}/';
 
     /**
