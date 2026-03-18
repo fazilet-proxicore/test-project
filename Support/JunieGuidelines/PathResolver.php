@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Application\Junie;
+namespace Support\JunieGuidelines;
 
 use Illuminate\Support\Facades\File;
 
@@ -38,15 +38,6 @@ class PathResolver
         return $this->normalizePath(base_path($folderPath));
     }
 
-    public function resolveGlobPath(string $path, string $relativeTo): string
-    {
-        if ($this->isAbsolutePath($path)) {
-            return $path;
-        }
-
-        return $relativeTo.DIRECTORY_SEPARATOR.$path;
-    }
-
     public function normalizePath(string $path): string
     {
         return realpath($path) ?: $path;
@@ -56,10 +47,5 @@ class PathResolver
     {
         return str_starts_with($path, '/')
             || preg_match('/^[A-Z]:\\\\/i', $path) === 1;
-    }
-
-    public function isWildcardPath(string $path): bool
-    {
-        return str_contains($path, '*');
     }
 }

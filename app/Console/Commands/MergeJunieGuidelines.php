@@ -2,15 +2,15 @@
 
 namespace App\Console\Commands;
 
-use App\Application\Junie\GuidelineMerger;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\File;
 use RuntimeException;
+use Support\JunieGuidelines\GuidelineMerger;
 
 class MergeJunieGuidelines extends Command
 {
     protected $signature = 'app:merge-junie-guidelines
-                            {--local=.junie/guidelines_local.md}
+                            {--local=module_templates/guidelines_local.md}
                             {--output=.junie/guidelines.md}';
 
     protected $description = 'Build merged Junie guidelines from local file and included base/service files';

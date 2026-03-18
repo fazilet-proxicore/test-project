@@ -2,10 +2,10 @@
 
 namespace Tests\Unit\Application\Junie;
 
-use App\Application\Junie\IncludeExpander;
-use App\Application\Junie\PathResolver;
 use Illuminate\Support\Facades\File;
 use Mockery\MockInterface;
+use Support\JunieGuidelines\IncludeExpander;
+use Support\JunieGuidelines\PathResolver;
 use Tests\TestCase;
 
 class IncludeExpanderTest extends TestCase
@@ -32,7 +32,6 @@ class IncludeExpanderTest extends TestCase
         $content = 'Before {$includeFile=foo.md$} After';
         $resolvedPath = '/root/foo.md';
 
-        $this->pathResolver->expects('isWildcardPath')->with('foo.md')->andReturn(false);
         $this->pathResolver->expects('resolvePath')->with('foo.md', '/root')->andReturn($resolvedPath);
         $this->pathResolver->expects('normalizePath')->with($resolvedPath)->andReturn($resolvedPath);
 
@@ -42,38 +41,12 @@ class IncludeExpanderTest extends TestCase
         $this->assertEquals('Before Included content After', $this->expander->expand($content, '/root'));
     }
 
-    public function test_expand_wildcard_include(): void
-    {
-        $content = 'List: {$includeFile=docs/*.md$}';
-        $globPath = '/root/docs/*.md';
-        $file1 = '/root/docs/a.md';
-        $file2 = '/root/docs/b.md';
-
-        $this->pathResolver->expects('isWildcardPath')->with('docs/*.md')->andReturn(true);
-        $this->pathResolver->expects('resolveGlobPath')->with('docs/*.md', '/root')->andReturn($globPath);
-
-        File::shouldReceive('glob')->with($globPath)->andReturn([$file2, $file1]); // Unsorted
-
-        File::shouldReceive('exists')->with($file1)->andReturn(true);
-        File::shouldReceive('exists')->with($file2)->andReturn(true);
-
-        $this->pathResolver->expects('normalizePath')->with($file1)->andReturn($file1);
-        $this->pathResolver->expects('normalizePath')->with($file2)->andReturn($file2);
-
-        File::shouldReceive('get')->with($file1)->andReturn('Content A');
-        File::shouldReceive('get')->with($file2)->andReturn('Content B');
-
-        // Sorted by filename: a.md, then b.md
-        $expected = "List: Content A\n\nContent B";
-        $this->assertEquals($expected, $this->expander->expand($content, '/root'));
-    }
 
     public function test_circular_include_detection(): void
     {
         $content = 'Include me {$includeFile=self.md$}';
         $path = '/root/self.md';
 
-        $this->pathResolver->expects('isWildcardPath')->with('self.md')->andReturn(false);
         $this->pathResolver->expects('resolvePath')->with('self.md', '/root')->andReturn($path);
         $this->pathResolver->expects('normalizePath')->with($path)->andReturn($path);
 
@@ -96,12 +69,10 @@ class IncludeExpanderTest extends TestCase
         $fileBContent = 'B includes {$includeFile=fileA.md$}';
 
         // Mocks for fileA
-        $this->pathResolver->expects('isWildcardPath')->with('fileB.md')->andReturn(false);
         $this->pathResolver->expects('resolvePath')->with('fileB.md', '/root')->andReturn($fileBPath);
         $this->pathResolver->expects('normalizePath')->with($fileBPath)->andReturn($fileBPath);
 
         // Mocks for fileB
-        $this->pathResolver->expects('isWildcardPath')->with('fileA.md')->andReturn(false);
         $this->pathResolver->expects('resolvePath')->with('fileA.md', '/root')->andReturn($fileAPath);
         $this->pathResolver->expects('normalizePath')->with($fileAPath)->andReturn($fileAPath);
 
@@ -127,7 +98,6 @@ class IncludeExpanderTest extends TestCase
         $content = 'Missing {$includeFile=missing.md$}';
         $path = '/root/missing.md';
 
-        $this->pathResolver->expects('isWildcardPath')->with('missing.md')->andReturn(false);
         $this->pathResolver->expects('resolvePath')->with('missing.md', '/root')->andReturn($path);
 
         File::shouldReceive('exists')->with($path)->andReturn(false);
@@ -141,7 +111,6 @@ class IncludeExpanderTest extends TestCase
         $content = 'Empty {$includeFile=empty.md$}';
         $path = '/root/empty.md';
 
-        $this->pathResolver->expects('isWildcardPath')->with('empty.md')->andReturn(false);
         $this->pathResolver->expects('resolvePath')->with('empty.md', '/root')->andReturn($path);
         $this->pathResolver->expects('normalizePath')->with($path)->andReturn($path);
 
@@ -156,26 +125,30 @@ class IncludeExpanderTest extends TestCase
     {
         $content = 'Folder: {$includeFolder=guides$}';
         $resolvedFolder = '/root/guides';
-        $file1 = '/root/guides/1.md';
-        $file2 = '/root/guides/2.md';
+        $file1Mock = $this->mock(\Symfony\Component\Finder\SplFileInfo::class);
+        $file2Mock = $this->mock(\Symfony\Component\Finder\SplFileInfo::class);
 
         $this->pathResolver->expects('resolveFolderPath')->with('guides', '/root')->andReturn($resolvedFolder);
         File::shouldReceive('isDirectory')->with($resolvedFolder)->andReturn(true);
 
-        // Under the hood it calls expandWildcardInclude('guides/*')
-        $globPath = '/root/guides/*';
-        $this->pathResolver->expects('resolveGlobPath')->with('guides/*', '/root')->andReturn($globPath);
+        $file1Mock->shouldReceive('getFilename')->andReturn('1.md');
+        $file1Mock->shouldReceive('getExtension')->andReturn('md');
+        $file1Mock->shouldReceive('getRealPath')->andReturn('/root/guides/1.md');
 
-        File::shouldReceive('glob')->with($globPath)->andReturn([$file1, $file2]);
+        $file2Mock->shouldReceive('getFilename')->andReturn('2.md');
+        $file2Mock->shouldReceive('getExtension')->andReturn('md');
+        $file2Mock->shouldReceive('getRealPath')->andReturn('/root/guides/2.md');
 
-        File::shouldReceive('exists')->with($file1)->andReturn(true);
-        File::shouldReceive('exists')->with($file2)->andReturn(true);
+        File::shouldReceive('files')->with($resolvedFolder)->andReturn([$file2Mock, $file1Mock]);
 
-        $this->pathResolver->expects('normalizePath')->with($file1)->andReturn($file1);
-        $this->pathResolver->expects('normalizePath')->with($file2)->andReturn($file2);
+        $this->pathResolver->expects('normalizePath')->with('/root/guides/1.md')->andReturn('/root/guides/1.md');
+        $this->pathResolver->expects('normalizePath')->with('/root/guides/2.md')->andReturn('/root/guides/2.md');
 
-        File::shouldReceive('get')->with($file1)->andReturn('Guide 1');
-        File::shouldReceive('get')->with($file2)->andReturn('Guide 2');
+        File::shouldReceive('exists')->with('/root/guides/1.md')->andReturn(true);
+        File::shouldReceive('exists')->with('/root/guides/2.md')->andReturn(true);
+
+        File::shouldReceive('get')->with('/root/guides/1.md')->andReturn('Guide 1');
+        File::shouldReceive('get')->with('/root/guides/2.md')->andReturn('Guide 2');
 
         $expected = "Folder: Guide 1\n\nGuide 2";
         $this->assertEquals($expected, $this->expander->expand($content, '/root'));

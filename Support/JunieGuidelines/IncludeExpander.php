@@ -1,14 +1,12 @@
 <?php
 
-namespace App\Application\Junie;
+namespace Support\JunieGuidelines;
 
 use Illuminate\Support\Facades\File;
 
 class IncludeExpander
 {
     private const FILE_INCLUDE_PATTERN = '/\{\$includeFile=(.+?)\$}/';
-
-    //if we use wildcard we do not need this
     private const FOLDER_INCLUDE_PATTERN = '/\{\$includeFolder=(.+?)\$}/';
 
     /**
@@ -26,14 +24,6 @@ class IncludeExpander
             self::FILE_INCLUDE_PATTERN,
             function (array $matches) use ($relativeTo, $visitedFiles) {
                 $includePath = trim($matches[1]);
-
-                if ($this->pathResolver->isWildcardPath($includePath)) {
-                    return $this->expandWildcardInclude(
-                        includePath: $includePath,
-                        relativeTo: $relativeTo,
-                        visitedFiles: $visitedFiles,
-                    );
-                }
 
                 return $this->expandSingleInclude(
                     includePath: $includePath,
@@ -79,11 +69,34 @@ class IncludeExpander
             return '';
         }
 
-        return $this->expandWildcardInclude(
-            includePath: $folderPath.DIRECTORY_SEPARATOR.'*',
-            relativeTo: $relativeTo,
-            visitedFiles: $visitedFiles
-        );
+        $files = File::files($resolvedFolder);
+
+        if (empty($files)) {
+            return '';
+        }
+
+        // Sort files by name to ensure consistent order
+        usort($files, fn ($a, $b) => strcmp($a->getFilename(), $b->getFilename()));
+
+        $contents = [];
+
+        foreach ($files as $file) {
+            // Only include .md files
+            if ($file->getExtension() !== 'md') {
+                continue;
+            }
+
+            $expanded = $this->loadAndExpandFile(
+                filePath: $file->getRealPath(),
+                visitedFiles: $visitedFiles,
+            );
+
+            if (! $this->isBlank($expanded)) {
+                $contents[] = trim($expanded);
+            }
+        }
+
+        return implode(PHP_EOL.PHP_EOL, $contents);
     }
 
     private function expandSingleInclude(
@@ -97,38 +110,6 @@ class IncludeExpander
             filePath: $filePath,
             visitedFiles: $visitedFiles,
         );
-    }
-
-    private function expandWildcardInclude(
-        string $includePath,
-        string $relativeTo,
-        array $visitedFiles = []
-    ): string {
-        $globPath = $this->pathResolver->resolveGlobPath($includePath, $relativeTo);
-        $files = File::glob($globPath);
-
-        if (empty($files)) {
-            $this->addWarning("No files matched wildcard include: {$globPath}");
-
-            return '';
-        }
-
-        sort($files);
-
-        $contents = [];
-
-        foreach ($files as $file) {
-            $expanded = $this->loadAndExpandFile(
-                filePath: $file,
-                visitedFiles: $visitedFiles,
-            );
-
-            if (! $this->isBlank($expanded)) {
-                $contents[] = trim($expanded);
-            }
-        }
-
-        return implode(PHP_EOL.PHP_EOL, $contents);
     }
 
     private function loadAndExpandFile(
