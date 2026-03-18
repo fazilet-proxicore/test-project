@@ -58,9 +58,6 @@ class IncludeExpander
         );
     }
 
-    /**
-     * @return array<int, string>
-     */
     public function warnings(): array
     {
         return $this->warnings;
