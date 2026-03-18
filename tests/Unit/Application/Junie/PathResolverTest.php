@@ -13,7 +13,7 @@ class PathResolverTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->resolver = new PathResolver();
+        $this->resolver = new PathResolver;
     }
 
     public function test_is_absolute_path(): void
@@ -47,7 +47,7 @@ class PathResolverTest extends TestCase
     public function test_resolve_glob_path(): void
     {
         $this->assertEquals('/absolute/path/*.md', $this->resolver->resolveGlobPath('/absolute/path/*.md', '/relative/to'));
-        $this->assertEquals('/relative/to' . DIRECTORY_SEPARATOR . 'foo/*.md', $this->resolver->resolveGlobPath('foo/*.md', '/relative/to'));
+        $this->assertEquals('/relative/to'.DIRECTORY_SEPARATOR.'foo/*.md', $this->resolver->resolveGlobPath('foo/*.md', '/relative/to'));
     }
 
     public function test_resolve_path_absolute(): void
@@ -58,7 +58,7 @@ class PathResolverTest extends TestCase
     public function test_resolve_path_relative_exists(): void
     {
         File::shouldReceive('exists')
-            ->with('/relative/to' . DIRECTORY_SEPARATOR . 'foo.md')
+            ->with('/relative/to'.DIRECTORY_SEPARATOR.'foo.md')
             ->andReturn(true);
 
         // normalizePath uses realpath, but for mock we can just assume it returns what it's given if it doesn't exist on disk
@@ -66,13 +66,13 @@ class PathResolverTest extends TestCase
         // Let's use a path that actually exists for realpath to work or just rely on the fallback in normalizePath.
 
         $result = $this->resolver->resolvePath('foo.md', '/relative/to');
-        $this->assertEquals('/relative/to' . DIRECTORY_SEPARATOR . 'foo.md', $result);
+        $this->assertEquals('/relative/to'.DIRECTORY_SEPARATOR.'foo.md', $result);
     }
 
     public function test_resolve_path_relative_missing_fallback_to_base_path(): void
     {
         File::shouldReceive('exists')
-            ->with('/relative/to' . DIRECTORY_SEPARATOR . 'foo.md')
+            ->with('/relative/to'.DIRECTORY_SEPARATOR.'foo.md')
             ->andReturn(false);
 
         // base_path() will be called. In Laravel tests, base_path() works.

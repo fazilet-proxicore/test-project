@@ -12,7 +12,7 @@ class PathResolver
             return $path;
         }
 
-        $relativePath = $relativeTo . DIRECTORY_SEPARATOR . $path;
+        $relativePath = $relativeTo.DIRECTORY_SEPARATOR.$path;
 
         if (File::exists($relativePath)) {
             return $this->normalizePath($relativePath);
@@ -23,13 +23,28 @@ class PathResolver
         return $this->normalizePath($basePath);
     }
 
+    public function resolveFolderPath(string $folderPath, string $relativeTo): string
+    {
+        if ($this->isAbsolutePath($folderPath)) {
+            return rtrim($folderPath, DIRECTORY_SEPARATOR);
+        }
+
+        $relativePath = $relativeTo.DIRECTORY_SEPARATOR.$folderPath;
+
+        if (File::isDirectory($relativePath)) {
+            return $this->normalizePath($relativePath);
+        }
+
+        return $this->normalizePath(base_path($folderPath));
+    }
+
     public function resolveGlobPath(string $path, string $relativeTo): string
     {
         if ($this->isAbsolutePath($path)) {
             return $path;
         }
 
-        return $relativeTo . DIRECTORY_SEPARATOR . $path;
+        return $relativeTo.DIRECTORY_SEPARATOR.$path;
     }
 
     public function normalizePath(string $path): string

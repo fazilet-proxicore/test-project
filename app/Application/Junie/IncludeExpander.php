@@ -6,7 +6,9 @@ use Illuminate\Support\Facades\File;
 
 class IncludeExpander
 {
-    private const INCLUDE_PATTERN = '/\{\$includeFile=(.+?)\$\}/';
+    private const FILE_INCLUDE_PATTERN = '/\{\$includeFile=(.+?)\$}/';
+
+    private const FOLDER_INCLUDE_PATTERN = '/\{\$includeFolder=(.+?)\$}/';
 
     /**
      * @var array<int, string>
@@ -15,13 +17,12 @@ class IncludeExpander
 
     public function __construct(
         private PathResolver $pathResolver
-    ) {
-    }
+    ) {}
 
     public function expand(string $content, string $relativeTo, array $visitedFiles = []): string
     {
-        return preg_replace_callback(
-            self::INCLUDE_PATTERN,
+        $content = preg_replace_callback(
+            self::FILE_INCLUDE_PATTERN,
             function (array $matches) use ($relativeTo, $visitedFiles) {
                 $includePath = trim($matches[1]);
 
@@ -41,6 +42,20 @@ class IncludeExpander
             },
             $content
         );
+
+        return preg_replace_callback(
+            self::FOLDER_INCLUDE_PATTERN,
+            function (array $matches) use ($relativeTo, $visitedFiles) {
+                $folderPath = trim($matches[1]);
+
+                return $this->expandFolderInclude(
+                    folderPath: $folderPath,
+                    relativeTo: $relativeTo,
+                    visitedFiles: $visitedFiles
+                );
+            },
+            $content
+        );
     }
 
     /**
@@ -54,6 +69,23 @@ class IncludeExpander
     public function resetWarnings(): void
     {
         $this->warnings = [];
+    }
+
+    private function expandFolderInclude(string $folderPath, string $relativeTo, array $visitedFiles): string
+    {
+        $resolvedFolder = $this->pathResolver->resolveFolderPath($folderPath, $relativeTo);
+
+        if (! File::isDirectory($resolvedFolder)) {
+            $this->addWarning("Included folder not found: {$resolvedFolder}");
+
+            return '';
+        }
+
+        return $this->expandWildcardInclude(
+            includePath: $folderPath.DIRECTORY_SEPARATOR.'*',
+            relativeTo: $relativeTo,
+            visitedFiles: $visitedFiles
+        );
     }
 
     private function expandSingleInclude(
@@ -98,7 +130,7 @@ class IncludeExpander
             }
         }
 
-        return implode(PHP_EOL . PHP_EOL, $contents);
+        return implode(PHP_EOL.PHP_EOL, $contents);
     }
 
     private function loadAndExpandFile(

@@ -30,7 +30,7 @@ class MergeJunieGuidelines extends Command
         } catch (RuntimeException $exception) {
             $this->error($exception->getMessage());
 
-            return self::FAILURE;
+            return self::FAILURE;  // or another error handling?? return ['status' => 'failure'];
         }
         foreach ($this->guidelineMerger->warnings() as $warning) {
             $this->warn($warning);

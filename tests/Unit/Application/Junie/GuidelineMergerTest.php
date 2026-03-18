@@ -13,7 +13,9 @@ use Tests\TestCase;
 class GuidelineMergerTest extends TestCase
 {
     private GuidelineMerger $merger;
+
     private IncludeExpander|MockInterface $includeExpander;
+
     private PathResolver|MockInterface $pathResolver;
 
     protected function setUp(): void
@@ -54,8 +56,8 @@ class GuidelineMergerTest extends TestCase
     public function test_merge_successful(): void
     {
         $path = '/root/local.md';
-        $content = "Local content";
-        $mergedContent = "Merged content";
+        $content = 'Local content';
+        $mergedContent = 'Merged content';
 
         File::shouldReceive('exists')->with($path)->andReturn(true);
         File::shouldReceive('get')->with($path)->andReturn($content);

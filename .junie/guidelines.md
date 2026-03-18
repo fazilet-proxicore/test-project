@@ -8,7 +8,6 @@ My Laravel docs
 
 ....
 
-
 Hello world
 
 # API Scaffolding Guidelines
