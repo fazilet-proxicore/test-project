@@ -11,7 +11,6 @@ use Tests\TestCase;
 class IncludeExpanderTest extends TestCase
 {
     private IncludeExpander $expander;
-
     private PathResolver|MockInterface $pathResolver;
 
     protected function setUp(): void

@@ -12,7 +12,7 @@ class PathResolver
             return $path;
         }
 
-        $relativePath = $relativeTo.DIRECTORY_SEPARATOR.$path;
+        $relativePath = $relativeTo . DIRECTORY_SEPARATOR . $path;
 
         if (File::exists($relativePath)) {
             return $this->normalizePath($relativePath);
@@ -29,7 +29,7 @@ class PathResolver
             return rtrim($folderPath, DIRECTORY_SEPARATOR);
         }
 
-        $relativePath = $relativeTo.DIRECTORY_SEPARATOR.$folderPath;
+        $relativePath = $relativeTo . DIRECTORY_SEPARATOR . $folderPath;
 
         if (File::isDirectory($relativePath)) {
             return $this->normalizePath($relativePath);
@@ -44,7 +44,7 @@ class PathResolver
             return $path;
         }
 
-        return $relativeTo.DIRECTORY_SEPARATOR.$path;
+        return $relativeTo . DIRECTORY_SEPARATOR . $path;
     }
 
     public function normalizePath(string $path): string

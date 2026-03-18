@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\File;
 class IncludeExpander
 {
     private const FILE_INCLUDE_PATTERN = '/\{\$includeFile=(.+?)\$}/';
-
     private const FOLDER_INCLUDE_PATTERN = '/\{\$includeFolder=(.+?)\$}/';
 
     /**
@@ -75,14 +74,14 @@ class IncludeExpander
     {
         $resolvedFolder = $this->pathResolver->resolveFolderPath($folderPath, $relativeTo);
 
-        if (! File::isDirectory($resolvedFolder)) {
+        if (!File::isDirectory($resolvedFolder)) {
             $this->addWarning("Included folder not found: {$resolvedFolder}");
 
             return '';
         }
 
         return $this->expandWildcardInclude(
-            includePath: $folderPath.DIRECTORY_SEPARATOR.'*',
+            includePath: $folderPath . DIRECTORY_SEPARATOR . '*',
             relativeTo: $relativeTo,
             visitedFiles: $visitedFiles
         );
@@ -125,19 +124,19 @@ class IncludeExpander
                 visitedFiles: $visitedFiles,
             );
 
-            if (! $this->isBlank($expanded)) {
+            if (!$this->isBlank($expanded)) {
                 $contents[] = trim($expanded);
             }
         }
 
-        return implode(PHP_EOL.PHP_EOL, $contents);
+        return implode(PHP_EOL . PHP_EOL, $contents);
     }
 
     private function loadAndExpandFile(
         string $filePath,
         array $visitedFiles = []
     ): string {
-        if (! File::exists($filePath)) {
+        if (!File::exists($filePath)) {
             $this->addWarning("Included file not found: {$filePath}");
 
             return '';

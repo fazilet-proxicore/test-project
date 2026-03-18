@@ -12,7 +12,6 @@ class MergeJunieGuidelines extends Command
     protected $signature = 'app:merge-junie-guidelines
                             {--local=.junie/guidelines_local.md}
                             {--output=.junie/guidelines.md}';
-
     protected $description = 'Build merged Junie guidelines from local file and included base/service files';
 
     public function __construct(
@@ -36,7 +35,7 @@ class MergeJunieGuidelines extends Command
             $this->warn($warning);
         }
         File::ensureDirectoryExists(dirname($outputGuidelinesPath));
-        File::put($outputGuidelinesPath, trim($mergedContent).PHP_EOL);
+        File::put($outputGuidelinesPath, trim($mergedContent) . PHP_EOL);
 
         $this->info("Junie guidelines generated: {$outputGuidelinesPath}");
 
