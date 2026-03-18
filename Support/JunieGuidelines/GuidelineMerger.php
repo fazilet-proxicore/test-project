@@ -19,7 +19,7 @@ class GuidelineMerger
         $this->warnings = [];
         $this->includeExpander->resetWarnings();
 
-        if (! File::exists($localGuidelinesPath)) {
+        if (!File::exists($localGuidelinesPath)) {
             throw new RuntimeException("Local guidelines file could not be found: {$localGuidelinesPath}");
             // warning for fail-soft OR throw error
         }
@@ -57,5 +57,4 @@ class GuidelineMerger
     {
         return trim($content) === '';
     }
-
 }

@@ -63,7 +63,7 @@ class IncludeExpander
     {
         $resolvedFolder = $this->pathResolver->resolveFolderPath($folderPath, $relativeTo);
 
-        if (! File::isDirectory($resolvedFolder)) {
+        if (!File::isDirectory($resolvedFolder)) {
             $this->addWarning("Included folder not found: {$resolvedFolder}");
 
             return '';
@@ -91,12 +91,12 @@ class IncludeExpander
                 visitedFiles: $visitedFiles,
             );
 
-            if (! $this->isBlank($expanded)) {
+            if (!$this->isBlank($expanded)) {
                 $contents[] = trim($expanded);
             }
         }
 
-        return implode(PHP_EOL.PHP_EOL, $contents);
+        return implode(PHP_EOL . PHP_EOL, $contents);
     }
 
     private function expandSingleInclude(
@@ -116,7 +116,7 @@ class IncludeExpander
         string $filePath,
         array $visitedFiles = []
     ): string {
-        if (! File::exists($filePath)) {
+        if (!File::exists($filePath)) {
             $this->addWarning("Included file not found: {$filePath}");
 
             return '';

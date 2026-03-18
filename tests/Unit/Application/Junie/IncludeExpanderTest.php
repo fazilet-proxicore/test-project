@@ -6,12 +6,12 @@ use Illuminate\Support\Facades\File;
 use Mockery\MockInterface;
 use Support\JunieGuidelines\IncludeExpander;
 use Support\JunieGuidelines\PathResolver;
+use Symfony\Component\Finder\SplFileInfo;
 use Tests\TestCase;
 
 class IncludeExpanderTest extends TestCase
 {
     private IncludeExpander $expander;
-
     private PathResolver|MockInterface $pathResolver;
 
     protected function setUp(): void
@@ -40,7 +40,6 @@ class IncludeExpanderTest extends TestCase
 
         $this->assertEquals('Before Included content After', $this->expander->expand($content, '/root'));
     }
-
 
     public function test_circular_include_detection(): void
     {
@@ -125,8 +124,8 @@ class IncludeExpanderTest extends TestCase
     {
         $content = 'Folder: {$includeFolder=guides$}';
         $resolvedFolder = '/root/guides';
-        $file1Mock = $this->mock(\Symfony\Component\Finder\SplFileInfo::class);
-        $file2Mock = $this->mock(\Symfony\Component\Finder\SplFileInfo::class);
+        $file1Mock = $this->mock(SplFileInfo::class);
+        $file2Mock = $this->mock(SplFileInfo::class);
 
         $this->pathResolver->expects('resolveFolderPath')->with('guides', '/root')->andReturn($resolvedFolder);
         File::shouldReceive('isDirectory')->with($resolvedFolder)->andReturn(true);

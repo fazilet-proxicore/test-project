@@ -13,9 +13,7 @@ use Tests\TestCase;
 class GuidelineMergerTest extends TestCase
 {
     private GuidelineMerger $merger;
-
     private IncludeExpander|MockInterface $includeExpander;
-
     private PathResolver|MockInterface $pathResolver;
 
     protected function setUp(): void
