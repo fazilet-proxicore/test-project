@@ -13,6 +13,7 @@ class MergeJunieGuidelines extends Command
                             {--local=module_templates/guidelines_local.md}
                             {--output=.junie/guidelines.md}';
     protected $description = 'Build merged Junie guidelines from local file and included base/service files';
+   // protected $guidelinesPath ='bedrock_templates/guidelines_base';
 
     public function __construct(
         protected GuidelineMerger $guidelineMerger
@@ -24,6 +25,7 @@ class MergeJunieGuidelines extends Command
     {
         $localGuidelinesPath = base_path($this->option('local'));
         $outputGuidelinesPath = base_path($this->option('output'));
+       // $fullGuidelinesPath=base_path($this->guidelinesPath);
         try {
             $mergedContent = $this->guidelineMerger->mergeFromLocalFile($localGuidelinesPath);
         } catch (RuntimeException $exception) {
