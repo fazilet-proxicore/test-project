@@ -8,10 +8,10 @@ use Illuminate\Support\Facades\File;
 
 class ValidateEmails extends Command
 {
-    protected $signature = 'app:emails-validate';
+    protected $signature = 'mail:validate';
     protected $description = 'Validate that all email templates can be rendered without errors';
 
-    public function handle()
+    public function handle(): int
     {
         $renderer = new EmailRenderer();
         $emailViewPath = resource_path('views/emails');
@@ -38,7 +38,7 @@ class ValidateEmails extends Command
             try {
                 // We use dummy data for validation
                 // In a real scenario, we might want to provide specific test data for each template
-                $renderer->render($templateName, ['name' => 'Validation Test'], 'Validation Subject');
+                $renderer->renderView($templateName, ['name' => 'Validation Test'], 'Validation Subject');
                 $this->info("  [OK] Rendered successfully.");
                 $successCount++;
             } catch (\Exception $e) {
@@ -59,4 +59,5 @@ class ValidateEmails extends Command
         $template = str_replace(['/', '.blade.php'], ['.', ''], $relativePath);
         return 'emails.' . $template;
     }
+
 }

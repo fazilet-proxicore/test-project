@@ -15,7 +15,7 @@ class EmailSnapshotTest extends TestCase
     public function test_template_matches_snapshot()
     {
         $renderer = new EmailRenderer();
-        $dto = $renderer->render('emails.test-template', ['name' => 'John Doe'], 'Test Subject');
+        $dto = $renderer->renderView('emails.test-template', ['name' => 'John Doe'], 'Test Subject');
 
         $this->assertHtmlMatchesSnapshot('test-template-john-doe', $dto->content_html);
     }

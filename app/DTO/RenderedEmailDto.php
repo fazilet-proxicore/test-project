@@ -5,7 +5,7 @@ namespace App\DTO;
     public function __construct(
         public string $subject,
         public string $content_html,
-        public string $content_text,
-        public string $headers
+        public ?string $content_text=null,
+        public array $headers=[],
     ) {}
     }

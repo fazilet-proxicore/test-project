@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'courier' => [
+        'token' => env('COURIER_AUTH_TOKEN'),
+    ],
+
 ];
